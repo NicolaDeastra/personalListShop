@@ -3,13 +3,36 @@ import withDataFetching from "../withDataFetching";
 
 export const ListsContext = React.createContext();
 
-const ListsContextProvider = ({ children, data }) => (
-  <ListsContext.Provider value={{ lists: data }}>
-    {children}
-  </ListsContext.Provider>
-);
+async function fetchData(dataSource) {
+  try {
+    const data = await fetch(dataSource);
+    const dataJSON = await data.json();
 
-export default withDataFetching({
-  dataSource:
-    "https://my-json-server.typicode.com/pranayfpackt/-React-Projects/items",
-})(ListsContextProvider);
+    if (dataJSON) {
+      return await { data: dataJSON, error: false };
+    }
+  } catch (error) {
+    return { data: false, error: error.message };
+  }
+}
+
+const ListsContextProvider = ({ children }) => {
+  const [lists, setLists] = React.useState([]);
+
+  React.useEffect(() => {
+    const asyncFetchData = async (dataSource) => {
+      const result = await fetchData(dataSource);
+
+      setLists([...result.data]);
+    };
+    asyncFetchData(
+      "https://my-json-server.typicode.com/pranayfpackt/-React-Projects/lists"
+    );
+  }, [setLists]);
+
+  return (
+    <ListsContext.Provider value={{ lists }}>{children}</ListsContext.Provider>
+  );
+};
+
+export default ListsContextProvider;
