@@ -32,8 +32,14 @@ const Alert = styled.span`
   text-align: center;
 `;
 
-const Lists = ({ lists, loading = false, error = false, history }) =>
-  !loading && !error ? (
+const Lists = ({ lists, loading, error, getListsRequest, match, history }) => {
+  React.useEffect(() => {
+    if (!lists.length) {
+      getListsRequest();
+    }
+  }, [lists, getListsRequest]);
+
+  return !loading && !error ? (
     <>
       {history && <SubHeader title="Your Lists" />}
       <ListWrapper>
@@ -48,5 +54,5 @@ const Lists = ({ lists, loading = false, error = false, history }) =>
   ) : (
     <Alert>{loading ? "Loading..." : error}</Alert>
   );
-
+};
 export default Lists;
